@@ -1,4 +1,4 @@
-var readyCallback = function() {
+(function readyCallback() {
 	// Handler when the DOM is fully loaded
 	let url = "https://api.nytimes.com/svc/topstories/v2/home.json";
 	url += '?' + queryParams({
@@ -9,20 +9,13 @@ var readyCallback = function() {
 	.then(response => response.json())
 	.then(data => {
 		generateHeader(data.num_results);
+		createApp(data.results);
 		generateFooter(data.copyright);
-		generateMain(data.results);
 	})
 	.catch(e => {
 		console.log("Error", e);
 	});
-};
-
-//check document ready
-if (document.readyState != 'loading') {
-	readyCallback();
-} else {
-	document.addEventListener("DOMContentLoaded", readyCallback);
-}
+}());
 
 //generate query string
 function queryParams(source) {
@@ -36,59 +29,65 @@ function queryParams(source) {
 }
 
 function generateHeader(countResults) {
-	let headerTitle = document.createElement("h1");
-	addClass(headerTitle, "header-title");
-	let titleText = document.createTextNode(`Hello! Here present the Top Stories from The New York Times Developer Network. We found ${countResults} results`);
-	headerTitle.appendChild(titleText);
-	let headerLogo = document.createElement("div");
-	addClass(headerLogo, "header-logo");
-	document.querySelector("header").appendChild(headerLogo);
-	document.querySelector("header").appendChild(headerTitle);
+	let headerContainer = `
+		<header>
+			<div class="header-logo"></div>
+			<h1 class="header-title">Hello! Here present the Top Stories from The New York Times Developer Network. We found ${countResults} results</h1>
+		</header>
+	`;
+	document.body.innerHTML += headerContainer;
 }
 
 function generateFooter(copyright) {
-	let footerContainer = document.createElement("div");
-	addClass(footerContainer, "footer-copyright");
-	let footerText = document.createTextNode(`${copyright}`);
-	footerContainer.appendChild(footerText);
-	document.querySelector("footer").appendChild(footerContainer);
+	let footerContainer = `
+		<footer>
+			<div class="footer-copyright">${copyright}</div>
+		</footer>
+	`;
+	document.body.innerHTML += footerContainer;
 }
 
-function generateMain(results) {
+function createApp(results) {
 	//add results block
-	let resultsContainer = document.createElement("div");
-	addClass(resultsContainer, "results");
-	document.querySelector(".root-container").appendChild(resultsContainer);
+	let listNews = "";
 	
 	for (let [index, value] of results.entries()) {
-		addNews(index, value);
+		listNews += News(value, index);
 	}
 
-	var showLinks = resultsContainer.querySelectorAll(`.show-link`);
-	Array.from(showLinks).forEach(link => {
-		link.addEventListener('click', function(event) {
-			event.preventDefault();
-			let curNewsDetails = event.target.closest(".news").querySelector(".details");
+	let resultsContainer = `
+		<main>
+			<div class="root-container">
+				<div class="results">
+					${listNews}
+				</div>
+				<button class="show-more">Show more</button>
+			</div>
+		</main>
+	`;
+
+	document.body.innerHTML += resultsContainer;
+
+	document.addEventListener('click', function(event) {
+		let curSelector = event.target;
+		event.preventDefault();
+		if (hasClass(curSelector, 'show-link')) {
+			let curNewsDetails = curSelector.closest(".news").querySelector(".details");
 			if (hasClass(curNewsDetails, "hide")) {
 				removeClass(curNewsDetails, "hide");
-				event.target.innerHTML = "Hide details";
+				curSelector.innerHTML = "Hide details";
 			} else {
 				addClass(curNewsDetails, "hide");
-				event.target.innerHTML = "Show details";
+				curSelector.innerHTML = "Show details";
 			}
-			return false;
-		});
+		} else if (hasClass(curSelector, 'show-more')) {
+			showMore(10)
+		}
+		return false;
 	});
 
-	//add show-more button
-	let showMoreButton = document.createElement("button");
-	addClass(showMoreButton, "show-more");
-	let buttonText = document.createTextNode("Show more");
-	showMoreButton.appendChild(buttonText);
-	document.querySelector(".root-container").appendChild(showMoreButton);
-
-	var showMore = count => {
-		for (var i = itemsCount; i < (itemsCount + count); i++) {
+	let showMore = count => {
+		for (let i = itemsCount; i < (itemsCount + count); i++) {
 			let nextNews = document.querySelectorAll('.results .news')[i];
 			if (nextNews) {
 				removeClass(nextNews, "hide");
@@ -102,21 +101,12 @@ function generateMain(results) {
 		}
 	}
 
-	showMoreButton.addEventListener('click', function(event) {
-		event.preventDefault();
-		showMore(10)
-	});
-
-	var itemsCount = 0,
+	let itemsCount = 0,
 			itemsMax = document.querySelectorAll(".results .news").length;
 
 	//show first 10 items
 	showMore(10);
-}
-
-function addNews(index, obj) {
-	let resultsContainer = document.querySelector(".results");
-	resultsContainer.innerHTML += News(obj, index);
+	
 }
 
 let News = (news, id) => `
