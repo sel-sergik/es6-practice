@@ -26,7 +26,7 @@ function queryParams(source) {
 	return array.join("&");
 }
 
-function createApp({ results, num_results, copyright }) {
+function createApp({ results, 'num_result': countResults, copyright }) {
 	//add results block
 	let listNews = "";
 	
@@ -37,7 +37,7 @@ function createApp({ results, num_results, copyright }) {
 	let resultsContainer = `
 		<header>
 			<div class="header-logo"></div>
-			<h1 class="header-title">Hello! Here present the Top Stories from The New York Times Developer Network. We found ${num_results} results</h1>
+			<h1 class="header-title">Hello! Here present the Top Stories from The New York Times Developer Network. We found ${countResults} results</h1>
 		</header>
 		<main>
 			<div class="root-container">
