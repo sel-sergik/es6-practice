@@ -28,7 +28,7 @@ footer {
 }
 
 .header-title {
-  margin: 0;
+	margin: 0;
 	padding: 20px 100px 0 100px;
 }
 
@@ -116,6 +116,15 @@ footer {
 	display: none;
 }
 
-.clear {
+div.main-information:after {
+	content: "";
+	display: block;
 	clear:both;
+}
+
+div.error {
+	font-size: 22px;
+	color: red;
+	margin-top: 50px;
+	text-align: center;
 }

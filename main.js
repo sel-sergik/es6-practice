@@ -8,12 +8,10 @@
 	fetch(url)
 	.then(response => response.json())
 	.then(data => {
-		generateHeader(data.num_results);
-		createApp(data.results);
-		generateFooter(data.copyright);
+		createApp(data);
 	})
 	.catch(e => {
-		console.log("Error", e);
+		document.body.innerHTML = `<div class="error">Error! ${e}</div>`;
 	});
 }());
 
@@ -28,34 +26,19 @@ function queryParams(source) {
 	return array.join("&");
 }
 
-function generateHeader(countResults) {
-	let headerContainer = `
-		<header>
-			<div class="header-logo"></div>
-			<h1 class="header-title">Hello! Here present the Top Stories from The New York Times Developer Network. We found ${countResults} results</h1>
-		</header>
-	`;
-	document.body.innerHTML += headerContainer;
-}
-
-function generateFooter(copyright) {
-	let footerContainer = `
-		<footer>
-			<div class="footer-copyright">${copyright}</div>
-		</footer>
-	`;
-	document.body.innerHTML += footerContainer;
-}
-
-function createApp(results) {
+function createApp({ results, num_results, copyright }) {
 	//add results block
 	let listNews = "";
 	
 	for (let [index, value] of results.entries()) {
-		listNews += News(value, index);
+		listNews += news(value, index);
 	}
 
 	let resultsContainer = `
+		<header>
+			<div class="header-logo"></div>
+			<h1 class="header-title">Hello! Here present the Top Stories from The New York Times Developer Network. We found ${num_results} results</h1>
+		</header>
 		<main>
 			<div class="root-container">
 				<div class="results">
@@ -64,26 +47,28 @@ function createApp(results) {
 				<button class="show-more">Show more</button>
 			</div>
 		</main>
+		<footer>
+			<div class="footer-copyright">${copyright}</div>
+		</footer>
 	`;
 
 	document.body.innerHTML += resultsContainer;
 
 	document.addEventListener('click', function(event) {
-		let curSelector = event.target;
 		event.preventDefault();
-		if (hasClass(curSelector, 'show-link')) {
-			let curNewsDetails = curSelector.closest(".news").querySelector(".details");
+		const { target } = event;
+		if (hasClass(target, 'show-link')) {
+			let curNewsDetails = target.closest(".news").querySelector(".details");
 			if (hasClass(curNewsDetails, "hide")) {
 				removeClass(curNewsDetails, "hide");
-				curSelector.innerHTML = "Hide details";
+				target.textContent = "Hide details";
 			} else {
 				addClass(curNewsDetails, "hide");
-				curSelector.innerHTML = "Show details";
+				target.textContent = "Show details";
 			}
-		} else if (hasClass(curSelector, 'show-more')) {
+		} else if (hasClass(target, 'show-more')) {
 			showMore(10)
 		}
-		return false;
 	});
 
 	let showMore = count => {
@@ -109,20 +94,19 @@ function createApp(results) {
 	
 }
 
-let News = (news, id) => `
+let news = (curNews, id) => `
 	<div class="news hide" data-id="${id}">
 		<div class="main-information">
-			<div class="tumbnail"><img src="${ news.multimedia.length ? news.multimedia[news.multimedia.length - 2].url : 'icons/undefined.png'}" alt="main-image"/></div>
-			<div class="title"><a href="${ news.url }" class="news-link" target="_blank">${ news.title }</a></div>
-			<div class="sub-title">${ news.abstract }</div>
-			<div class="section">${ news.section }</div>
+			<div class="tumbnail"><img src="${ curNews.multimedia.length ? curNews.multimedia[curNews.multimedia.length - 2].url : 'icons/undefined.png'}" alt="main-image"/></div>
+			<div class="title"><a href="${ curNews.url }" class="news-link" target="_blank">${ curNews.title }</a></div>
+			<div class="sub-title">${ curNews.abstract }</div>
+			<div class="section">${ curNews.section }</div>
 			<a href="#" class="show-link">Show details</a>
-			<div class="clear"></div>
 		</div>
 		<div class="details hide">
-			<div class="author"><span>Author:</span> ${ news.byline }</div>
-			<div class="published_date"><span>Published:</span> ${ new Date(news.published_date).toLocaleString() }</div>
-			<div class="large-image"><img src="${ news.multimedia.length ? news.multimedia[news.multimedia.length - 1].url : ''}" alt="big-image"/></div>
+			<div class="author"><span>Author:</span> ${ curNews.byline }</div>
+			<div class="published_date"><span>Published:</span> ${ new Date(curNews.published_date).toLocaleString() }</div>
+			<div class="large-image"><img src="${ curNews.multimedia.length ? curNews.multimedia[curNews.multimedia.length - 1].url : ''}" alt="big-image"/></div>
 		</div>
 	</div>
 `;
