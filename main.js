@@ -1,12 +1,14 @@
 (function readyCallback() {
 	// Handler when the DOM is fully loaded
-	let url = "https://api.nytimes.com/svc/topstories/v2/home.json";
-	url += '?' + queryParams({
-		'api-key': "863581c034314134a39447d85afe41ab"
-	});
+	let url = `https://api.nytimes.com/svc/topstories/v2/home.json?${queryParams({ 'api-key': '863581c034314134a39447d85afe41ab' })}`;
 
 	fetch(url)
-	.then(response => response.json())
+	.then(response => {
+		if (response.status<200 || response.status>=400) {
+			throw new Error('Whoops! Data was not uploaded.');
+		}
+		return response.json();
+	})
 	.then(data => {
 		createApp(data);
 	})
@@ -20,21 +22,19 @@ function queryParams(source) {
 	let array = [];
 
 	for(let key in source) {
-		array.push(encodeURIComponent(key) + "=" + encodeURIComponent(source[key]));
+		array.push(`${encodeURIComponent(key)}=${encodeURIComponent(source[key])}`);
 	}
 
-	return array.join("&");
+	return array.join('');
 }
 
-function createApp({ results, 'num_result': countResults, copyright }) {
+function createApp({ results, num_result: countResults, copyright }) {
 	//add results block
-	let listNews = "";
+	let listNews = '';
 	
-	for (let [index, value] of results.entries()) {
-		listNews += news(value, index);
-	}
+	Array.from(results.entries()).map(([index, value]) => (listNews += news(value, index)));
 
-	let resultsContainer = `
+	const resultsContainer = `
 		<header>
 			<div class="header-logo"></div>
 			<h1 class="header-title">Hello! Here present the Top Stories from The New York Times Developer Network. We found ${countResults} results</h1>
@@ -58,36 +58,36 @@ function createApp({ results, 'num_result': countResults, copyright }) {
 		event.preventDefault();
 		const { target } = event;
 		if (hasClass(target, 'show-link')) {
-			let curNewsDetails = target.closest(".news").querySelector(".details");
-			if (hasClass(curNewsDetails, "hide")) {
-				removeClass(curNewsDetails, "hide");
-				target.textContent = "Hide details";
+			let curNewsDetails = target.closest('.news').querySelector('.details');
+			if (hasClass(curNewsDetails, 'hide')) {
+				removeClass(curNewsDetails, 'hide');
+				target.textContent = 'Hide details';
 			} else {
-				addClass(curNewsDetails, "hide");
-				target.textContent = "Show details";
+				addClass(curNewsDetails, 'hide');
+				target.textContent = 'Show details';
 			}
 		} else if (hasClass(target, 'show-more')) {
 			showMore(10)
 		}
 	});
 
-	let showMore = count => {
+	const showMore = count => {
 		for (let i = itemsCount; i < (itemsCount + count); i++) {
 			let nextNews = document.querySelectorAll('.results .news')[i];
 			if (nextNews) {
-				removeClass(nextNews, "hide");
+				removeClass(nextNews, 'hide');
 			}
 		}
 
 		itemsCount += count;
 		
 		if (itemsCount > itemsMax) {
-			addClass(document.querySelector(".show-more"), "hide");
+			addClass(document.querySelector('.show-more'), 'hide');
 		}
 	}
 
-	let itemsCount = 0,
-			itemsMax = document.querySelectorAll(".results .news").length;
+	let itemsCount = 0;
+	const	itemsMax = document.querySelectorAll('.results .news').length;
 
 	//show first 10 items
 	showMore(10);
@@ -97,7 +97,7 @@ function createApp({ results, 'num_result': countResults, copyright }) {
 let news = (curNews, id) => `
 	<div class="news hide" data-id="${id}">
 		<div class="main-information">
-			<div class="tumbnail"><img src="${ curNews.multimedia.length ? curNews.multimedia[curNews.multimedia.length - 2].url : 'icons/undefined.png'}" alt="main-image"/></div>
+			<div class="tumbnail"><img src="${ curNews.multimedia.length ? curNews.multimedia[curNews.multimedia.length - 2].url : 'icons/undefined.png' }" alt="main-image"/></div>
 			<div class="title"><a href="${ curNews.url }" class="news-link" target="_blank">${ curNews.title }</a></div>
 			<div class="sub-title">${ curNews.abstract }</div>
 			<div class="section">${ curNews.section }</div>
@@ -115,7 +115,7 @@ function addClass(el, className) {
 	if (el.classList) {
 		el.classList.add(className);
 	} else {
-		el.className += ' ' + className;
+		el.className += ` ${className}`;
 	}
 }
 
@@ -123,7 +123,7 @@ function removeClass(el, className) {
 	if (el.classList) {
 		el.classList.remove(className);
 	}	else {
-		el.className = el.className.replace(new RegExp('(^|\\b)' + className.split(' ').join('|') + '(\\b|$)', 'gi'), ' ');
+		el.className = el.className.replace(new RegExp(`(^|\\b)${className.split(' ').join('|')}(\\b|$)`, 'gi'), ' ');
 	}
 }
 
@@ -131,6 +131,6 @@ function hasClass(el, className) {
 	if (el.classList) {
 		return el.classList.contains(className);
 	} else {
-		return new RegExp('(^| )' + className + '( |$)', 'gi').test(el.className);
+		return new RegExp(`(^| )${className}( |$)`, 'gi').test(el.className);
 	}
 }

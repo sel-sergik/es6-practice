@@ -3,7 +3,7 @@
         "browser": true,
         "es6": true
     },
-    "extends": "eslint:recommended",
+    "extends": "airbnb",
     "rules": {
         "accessor-pairs": "error",
         "array-bracket-spacing": [
@@ -120,7 +120,6 @@
         "no-bitwise": "error",
         "no-caller": "error",
         "no-catch-shadow": "error",
-        "no-compare-neg-zero": "error",
         "no-confusing-arrow": "error",
         "no-continue": "error",
         "no-div-regex": "error",
@@ -162,7 +161,7 @@
         "no-new-require": "error",
         "no-new-wrappers": "error",
         "no-octal-escape": "error",
-        "no-param-reassign": "error",
+        "no-param-reassign": ["error", { "props": false }],
         "no-path-concat": "error",
         "no-plusplus": [
             "error",
@@ -178,7 +177,12 @@
         "no-restricted-imports": "error",
         "no-restricted-modules": "error",
         "no-restricted-properties": "error",
-        "no-restricted-syntax": "error",
+        "no-restricted-syntax": [
+            "error",
+            "ForOfStatement",
+            "LabeledStatement",
+            "WithStatement"
+        ],
         "no-return-assign": "error",
         "no-return-await": "error",
         "no-script-url": "error",
@@ -217,7 +221,6 @@
         "no-warning-comments": "error",
         "no-whitespace-before-property": "error",
         "no-with": "error",
-        "nonblock-statement-body-position": "error",
         "object-curly-newline": "off",
         "object-curly-spacing": [
             "error",
